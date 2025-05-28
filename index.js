@@ -7,7 +7,7 @@ import ChallengeController from"./Controllers/ChallengeController.js"
 import CodeExeculterController from './Controllers/CodeExecuterController.js'
 
 const app = express();
-const PORT = 3000;
+const PORT = 4000;
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
