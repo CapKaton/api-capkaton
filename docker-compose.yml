@@ -1,8 +1,14 @@
+version: '3.8'
 services:
   code-executor:
     build: .
     ports:
       - "3000:3000"
+    environment:
+      DB_HOST: host.docker.internal  
+      DB_USER: root
+      DB_PASS: 1234                  
+      DB_NAME: CAPKATON
     volumes:
       - .:/app
       - tmp_volume:/app/tmp
