@@ -1,16 +1,20 @@
-
-FROM node:18
+# Etapa de build com todas as dependências
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Instalar dependências do sistema (Python, Java, C++, etc.)
-RUN apt-get update && apt-get install -y \
+RUN npm install
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache \
     python3 \
     bash \
-    openjdk-17-jdk \
+    openjdk17-jdk \
     g++ \
-    git \
-    && apt-get clean
+    git
 
 COPY . .
 
@@ -18,10 +22,6 @@ RUN chmod +x ./scripts/*.sh || true
 
 RUN mkdir -p tmp
 
-RUN npm install
-
 EXPOSE 4000
 
 CMD ["node", "index.js"]
-
-

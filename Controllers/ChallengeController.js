@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {getQuestion,postQuestion} from "../Database/Repositories/ChallengeRepository.js"
+import {getLenguages} from "../Database/Repositories/LanguagesRepository.js"
 const app = Router();
 
 app.get('/Challenge/getChallengeQuestion/:challengeId', async (req, res) => {
@@ -10,8 +11,19 @@ app.get('/Challenge/getChallengeQuestion/:challengeId', async (req, res) => {
     }
 
     try {
-        const result = await getQuestion(challengeId);
+        let result = await getQuestion(challengeId);
+        const languages = await getLenguages();
+        const starterCode = {};
+        languages.forEach(lang => {
+            starterCode[lang.language_name] = lang.code_base;
+        });
+
+        result.forEach(lang => {
+            lang.starterCode = starterCode;
+        });
+        
         res.json(result);
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

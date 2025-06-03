@@ -5,8 +5,8 @@ export async function getQuestion(challengeId) {
       `
         select 
             id,
-            question_description,
-            question_name 
+            question_description as description,
+            question_name as title 
          from 
             tb_question;
       `
@@ -18,7 +18,7 @@ export async function getQuestion(challengeId) {
 export async function postQuestion(challengeId,groupId,questionId,questionAnswer,questionResult,timeSpent){
    const comando =
       `
-         INSERT INTO tb_answer (challengeId,groupId,questionId,questionAnswer,questionResult,time_spent)
+         INSERT INTO tb_answer (id_challenge,id_group,id_question,answer_code,answer_result,remaining_time)
          VALUES(?,?,?,?,?,?);
       `
    const [registro] = await con.query(comando,[challengeId,groupId,questionId,questionAnswer,questionResult,timeSpent]);
