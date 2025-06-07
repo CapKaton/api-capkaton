@@ -25,19 +25,11 @@ const languageMap = {
     },
     java: {
         ext: '.java',
-        cmd: (filename) => {
-        const className = path.basename(filename, '.java');
-        return `javac ${filename} && java ${className}`;
-        },
-    },
-    cpp: {
-        ext: '.cpp',
-        cmd: (filename) => {
-        const outPath = filename.replace('.cpp', '');
-        return `g++ ${filename} -o ${outPath} && ./${outPath}`;
-        },
-    },
-  };
+        cmd: () => `javac Main.java && java Main`,
+        fixedFile: 'Main.java', 
+        clean: () => ['Main.java', 'Main.class']
+  },
+};
   
   const TMP_DIR = path.join(__dirname, '../tmp');
   
@@ -45,40 +37,31 @@ const languageMap = {
     fs.mkdirSync(TMP_DIR);
   }
   
-  async function executeCode(language, code) {
-    const entry = languageMap[language];
-    if (!entry) throw new Error(`Linguagem "${language}" não suportada.`);
-  
-    const randomName = Math.random().toString(36).substring(2, 8);
-    const filename = path.join(TMP_DIR, `${randomName}${entry.ext}`);
-  
+async function executeCode(language, code) {
+    const lang = languageMap[language];
+    if (!lang) throw new Error(`Linguagem "${language}" não suportada.`);
+
+    const id = randomUUID();
+    const filename = path.join(TMP_DIR, lang.fixedFile || `${id}${lang.ext}`);
+
     fs.writeFileSync(filename, code);
-  
-    const command = entry.cmd(filename);
-  
-    return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
-        fs.unlinkSync(filename);
-  
-        if (entry.ext === '.java') {
-            const classFile = path.join(TMP_DIR, `${randomName}.class`);
-            if (fs.existsSync(classFile)) fs.unlinkSync(classFile);
-        }
-  
-        if (entry.ext === '.cpp') {
-            const binFile = path.join(TMP_DIR, randomName);
-            if (fs.existsSync(binFile)) fs.unlinkSync(binFile);
-        }
-  
-        resolve({
-            error: error ? error.message : null,
-            stdout,
-            stderr,
-        });
+
+    const command = lang.cmd(filename, id);
+
+    return new Promise((resolve) => {
+        exec(command, { cwd: TMP_DIR }, (error, stdout, stderr) => {
+            const filesToClean = lang.clean ? lang.clean(id) : [filename];
+            cleanupFiles(filesToClean);
+
+            resolve({
+                error: error ? error.message : null,
+                stdout,
+                stderr,
+            });
         });
     });
-  }
-  
+}
+
   app.post('/CodeExecuter/execute', async (req, res) => {
     const { language, code } = req.body;
   
