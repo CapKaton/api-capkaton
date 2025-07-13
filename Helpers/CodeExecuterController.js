@@ -37,8 +37,7 @@ const TMP_DIR = path.join(__dirname, '../tmp');
 function cleanupFiles(files) {
     files.forEach(file => {
         try {
-            fs.unlinkSync(file); // Remove o arquivo
-            console.log(`Arquivo removido: ${file}`);
+            fs.unlinkSync(file);
         } catch (err) {
             console.error(`Erro ao remover ${file}:`, err.message);
         }
@@ -59,7 +58,7 @@ export async function executeCode(language, code) {
     return new Promise((resolve) => {
         exec(command, { cwd: TMP_DIR }, (error, stdout, stderr) => {
             const filesToClean = lang.clean ? lang.clean(id) : [filename];
-            cleanupFiles(filesToClean); // Agora funciona!
+            cleanupFiles(filesToClean);
 
             resolve({
                 error: error ? error.message : null,
